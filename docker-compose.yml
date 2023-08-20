@@ -1,0 +1,43 @@
+version: '3'
+services:
+  mongo:
+    image: mongo:6.0.8
+    container_name: bemol-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  api:
+    container_name: bemol-omni-api
+    restart: always
+    build:
+      context: ./api
+    image: bemol-omni-api
+    command: npm run dev
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/bemol-omni
+    volumes:
+      - ./api:/usr/src/app
+
+  spa:
+    container_name: bemol-omni-spa
+    restart: always
+    build:
+      context: ./spa
+    image: bemol-omni-spa
+    command: npm start
+    ports:
+      - "3001:3001"
+    depends_on:
+      - api
+    volumes:
+      - ./spa:/usr/src/app
+
+volumes:
+  mongo_data:
